@@ -1,0 +1,24 @@
+{
+  "protocol_version": 1,
+  "input": {
+    "event_id": "purchase:order-123",
+    "event_name": "purchase",
+    "occurred_at": "2026-10-06T12:00:00Z",
+    "consent": {
+      "analytics": "granted",
+      "advertising": "denied"
+    },
+    "properties": {
+      "transaction_id": "order-123",
+      "value": 49.9,
+      "currency": "EUR"
+    }
+  },
+  "hashes": [
+    {
+      "type": "email",
+      "input": " TEST@example.com ",
+      "sha256": "973dfe463ec85785f5f95af5ba3906eedb2d931c24e69824a89ea65dba4e813b"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Protocol v1 fixtures are maintained in illumetric/siderelay-js. This copy is pinned to SDK release 0.1.0. Update both SDKs and the private collector together when the public contract changes. Fixtures contain illustrative values only.

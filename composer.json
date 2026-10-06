@@ -1,0 +1,3 @@
+{
+ "name": "siderelay/php", "description": "Simple backend tracking for SideRelay", "type": "library", "license": "MIT", "require": { "php": ">=8.2", "ext-curl": "*", "ext-mbstring": "*" }, "autoload": { "psr-4": { "SideRelay\\": "src/" } }, "scripts": { "test": "php tests/run.php" }
+}

@@ -1,0 +1,27 @@
+name: Release SDK
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semantic version to tag
+        required: true
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: curl, mbstring
+      - run: composer validate --strict
+      - run: php tests/run.php
+      - name: Tag release
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          php -r 'if (!preg_match("/^0\.[0-9]+\.[0-9]+$/D", getenv("RELEASE_VERSION"))) exit(1);'
+          git tag "v$RELEASE_VERSION"
+          git push origin "v$RELEASE_VERSION"
