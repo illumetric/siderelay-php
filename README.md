@@ -5,7 +5,7 @@ Requires PHP 8.2+, cURL, and mbstring. No framework dependency.
 
 ```sh
 composer config repositories.siderelay vcs https://github.com/illumetric/siderelay-php
-composer require siderelay/php:^0.1.0
+composer require siderelay/php:^0.1.1
 ```
 
 ```php
@@ -56,3 +56,8 @@ JavaScript repository's protocol v1 release. Publish an explicit version tag and
 register the public GitHub repository on Packagist. Ordinary commits do not release.
 Composer installation becomes available after Packagist registration; until then
 use a Composer VCS repository pointing to this GitHub repository.
+
+Optional `permissions` contains separate `collection`, `retention`, and `delivery`
+choices (`granted`, `denied`, `unknown`). These are vetoes, never substitutes for
+analytics or advertising consent. Map them to the website's reviewed policy;
+missing choices never become consent.
