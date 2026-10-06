@@ -34,7 +34,7 @@ check($limited->purchase($event)['attempts'] === 1, 'retry after');
 check($client->batch(array_fill(0, 101, $event))['status'] === 'configuration', 'batch limit');
 $gpc = Client::normalizeEvent($event + ['event_name' => 'purchase', 'consent' => ['advertising' => 'granted', 'global_privacy_control' => true]]);
 check($gpc['consent']['advertising'] === 'denied', 'GPC');
-echo "PHP SDK checks passed\n";
+
 $fixtures = json_decode(file_get_contents(__DIR__ . '/../fixtures/protocol-v1.json'), true);
 check(Client::normalizeEvent($fixtures['input'])['occurred_at'] === '2026-10-06T12:00:00.000Z', 'fixture timestamp');
 foreach ($fixtures['hashes'] as $fixture) {
@@ -43,3 +43,21 @@ foreach ($fixtures['hashes'] as $fixture) {
 
 $permissionEvent = Client::normalizeEvent($event + ['event_name' => 'purchase', 'permissions' => ['retention' => 'denied']]);
 check($permissionEvent['permissions']['retention'] === 'denied', 'Separate retention choice');
+
+$batchClient = new Client($token, transport: function ($url, $body) {
+    $payload = json_decode($body, true);
+    check(str_ends_with($url, '/v1/batch'), 'batch endpoint');
+    return ['status' => 202, 'body' => json_encode(['acknowledgements' => array_map(static fn ($event) => ['event_id' => $event['event_id'], 'status' => 'accepted', 'durable' => true], $payload['events'])])];
+});
+check($batchClient->batch([$event + ['event_name' => 'purchase']])['status'] === 'received', 'durable batch receipt');
+$leadClient = new Client($token, transport: function ($url, $body) {
+    $payload = json_decode($body, true);
+    check($payload['event_name'] === 'generate_lead', 'authoritative lead name');
+    return ['status' => 202, 'body' => json_encode(['event_id' => $payload['event_id'], 'status' => 'accepted', 'durable' => true])];
+});
+check($leadClient->lead(['event_id' => 'lead:123', 'occurred_at' => $event['occurred_at']])['status'] === 'received', 'lead receipt');
+$exhausted = new Client($token, transport: static fn () => ['status' => 503, 'body' => ''], sleep: static fn ($ms) => null);
+check($exhausted->purchase($event)['attempts'] === 3, 'three total attempts');
+$invalidReceipt = new Client($token, transport: static fn () => ['status' => 202, 'body' => json_encode(['event_id' => 'wrong', 'status' => 'accepted', 'durable' => true])]);
+check($invalidReceipt->purchase($event)['status'] === 'retry', 'mismatched receipt is not received');
+echo "PHP SDK checks passed\n";
